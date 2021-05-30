@@ -1,0 +1,260 @@
+#include <iostream>;
+#include <vector>;
+#include <string>
+#include <map>
+using namespace std;
+
+class BigInt
+{
+private:
+	vector<char> number;
+public:
+	// Constructor
+	BigInt();
+	BigInt(string n);
+	BigInt(int n);
+	BigInt(const BigInt& obj);
+
+	// Overloading Operator
+	BigInt operator + (const BigInt& obj); // Addition
+	BigInt operator - (int value); // Subtraction
+	BigInt& operator = (const BigInt& obj); // Assignment operator
+	bool operator == (int t);
+	bool operator <= (const int& t);
+	BigInt operator ++ (int x);
+
+	// Print
+	friend ostream& operator << (ostream& os, const BigInt& obj);
+	void print();
+
+	// Destructor
+	~BigInt();
+};
+
+
+int goldRabbits(int n)
+{
+	if (n == 0 || n == 1)
+		return 1;
+	else
+		return goldRabbits(n - 1) + goldRabbits(n - 2);
+}
+
+BigInt goldRabbits(BigInt bigN)
+{
+	static map<BigInt, BigInt> results;
+	//if (bigN == 0 || bigN == 1)
+	results.insert(pair<BigInt, BigInt>(BigInt(0), BigInt(0)));
+	//else
+		//results.insert(pair<BigInt, BigInt>(bigN, results[bigN - 1] + results[bigN - 2]));
+	return BigInt(1);
+}
+
+
+void pause()
+{
+	cout << "Press Enter to continue...";
+	getchar();
+}
+
+int main()
+{
+	BigInt B1("123456789123456789123456789123456789");
+	BigInt B2(B1);
+	BigInt MAX(INT_MAX);
+	cout << "B1:" << B1 << "\nB2:" << B2 << "\nMAX:" << MAX << endl;
+	pause();
+
+	cout << "\nB1:";
+	B1.print();
+	cout << endl;
+	pause();
+
+
+	//for(int i = 0; i <= 3000; i++)	// uncomment this
+		//cout << "\ngoldRabbits(" << i << ") = " << goldRabbits(BigInt(i));
+	/*for (int i = 0; i <= 3000; i++)		// comment this out
+	{
+	
+	cout << "\ngoldRabbits(" << i << ") = " << goldRabbits(i);
+	}*/
+	//pause();
+
+	//cout << "\nThis is the value of goldRabbits(3000)\n\n";
+	//BigInt gR3000 = goldRabbits(BigInt(3000));
+	//gR3000.print();
+
+	//pause();
+
+	int n = 500;
+	try {
+
+		cout << "The value of goldRabbits(n) is:" << goldRabbits(n) << endl;
+	}
+	catch (string error)
+	{
+		cout << error << endl;
+		cout << "Transitioning to BigInt\n";
+		//cout << goldRabbits(BigInt(n));
+	}
+
+	pause();
+}
+
+
+BigInt::BigInt()
+{
+	number.push_back('0');
+}
+
+BigInt::BigInt(string n)
+{
+	for (int i = 0; i < n.size(); i++)
+		number.push_back(n[i]);
+}
+
+BigInt::BigInt(int n)
+{
+	while (n > 0)
+	{
+		number.insert(number.begin(), n % 10 + 48);
+		n /= 10;
+	}
+}
+
+BigInt::BigInt(const BigInt& obj)
+{
+	// Copy data from obj
+	for (int i = 0; i < obj.number.size(); i++)
+		number.push_back(obj.number.at(i));
+}
+
+// Overloading Operator
+BigInt BigInt::operator + (const BigInt& obj) // Addition
+{
+	BigInt result;
+	int temp, carry;
+	carry = 0;
+	int i = number.size() - 1;
+	int j = obj.number.size() - 1;
+	do
+	{
+		if (i != 0 && j != 0)
+			temp = number.at(i) + obj.number.at(j) - 96 + carry;
+		else
+			if (i == 0)
+				temp = obj.number.at(j) - 48 + carry;
+			else
+				temp = number.at(i) - 48 + carry;
+		result.number.insert(result.number.begin(), temp % 10 + 48);
+		carry = temp / 10;
+		i--;
+		j--;
+	} while (i != 0 && j != 0);
+	if (carry > 0)
+		number.insert(number.begin(), carry + 48);
+	return result;
+}
+
+BigInt BigInt::operator - (int value) // Subtraction
+{
+	BigInt result;
+	int i = number.size() - 1;
+	int carry = 0, temp;
+	int value_temp;
+	while (i >= 0)
+	{
+		value_temp = value % 10;
+		temp = number.at(i) - 48;
+		if (temp < value_temp + carry)
+		{
+			temp = temp + 10 - value_temp - carry;
+			carry = 1;
+		}
+		else
+		{
+			temp = temp - value_temp - carry;
+			carry = 0;
+		}
+		result.number.push_back(temp + 48);
+		i--;
+		value /= 10;
+	}
+	return result;
+}
+
+
+BigInt& BigInt::operator = (const BigInt& obj) // Assignment operator
+{
+	for (int i = 0; i < obj.number.size(); i++)
+		number.push_back(obj.number[i]);
+	return *this;
+}
+
+bool BigInt::operator == (int t)
+{
+	int i = number.size() - 1;
+	int temp;
+	while (i >= 0)
+	{
+		temp = t % 10;
+		if (number[i] - 48 != temp)
+			return false;
+		t /= 10;
+		i--;
+	}
+	return true;
+}
+
+bool BigInt::operator <= (const int& n)
+{
+	BigInt temp(n);
+	if (number.size() < temp.number.size())
+		return true;
+	else
+		if (number.size() > temp.number.size())
+			return false;
+		else
+		{
+			for (int i = 0; i < number.size(); i++)
+				if (number[i] != temp.number[i])
+					return false;
+		}
+	return true;
+}
+
+BigInt BigInt::operator++ (int x)
+{
+	return *this + BigInt(1);
+}
+
+// Print
+ostream& operator << (ostream& os, const BigInt& obj)
+{
+	if (obj.number.size() < 13)
+	{
+		for (int i = 0; i < obj.number.size(); i++)
+			os << obj.number[i];
+	}
+	else
+	{
+		int exp = obj.number.size();
+		os << obj.number[0] << ".";
+		for (int i = 1; i < 11; i++)
+			os << obj.number[i];
+		os << "e" << exp;
+	}
+	return os;
+}
+
+void BigInt::print()
+{
+	for (int i = 0; i < number.size(); i++)
+		cout << number[i];
+}
+
+// Destructor
+BigInt::~BigInt()
+{
+	number.clear();
+}
